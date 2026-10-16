@@ -60,28 +60,44 @@
     revealEls.forEach(function (el) { el.classList.add("in"); });
   }
 
-  /* ---- WhatsApp: satu nomor acak per halaman untuk CTA + tombol mengambang ---- */
+  /* ---- WhatsApp: nomor CS acak, dipakai tombol mengambang + CTA "Konsultasi Gratis" ---- */
   var WA_NUMBERS = ["6281399541494", "6285814777485", "6285872121214"];
-  var waNumber = WA_NUMBERS[Math.floor(Math.random() * WA_NUMBERS.length)];
   var WA_TEXT = "Halo NUSA PMC, saya ingin konsultasi tentang tenda / kanopi membrane.";
-  var WA_LINK = "https://wa.me/" + waNumber + "?text=" + encodeURIComponent(WA_TEXT);
+  var waNumber = WA_NUMBERS[Math.floor(Math.random() * WA_NUMBERS.length)];
+  var waFloat;
 
-  Array.prototype.forEach.call(document.querySelectorAll("a[href*='wa.me']"), function (a) {
-    if (/konsultasi gratis/i.test(a.textContent)) {
-      a.href = a.getAttribute("href").replace(/wa\.me\/\d+/, "wa.me/" + waNumber);
-    }
-  });
+  var waCtas = Array.prototype.filter.call(
+    document.querySelectorAll("a[href*='wa.me']"),
+    function (a) { return /konsultasi gratis/i.test(a.textContent); }
+  );
 
-  var waFloat = document.createElement("a");
+  function waApply() {
+    var link = "https://wa.me/" + waNumber + "?text=" + encodeURIComponent(WA_TEXT);
+    waCtas.forEach(function (a) { a.href = link; });
+    if (!waFloat) return;
+    waFloat.href = link;
+    waFloat.setAttribute("aria-label", "Chat WhatsApp: +" + waNumber);
+    waFloat.title = "Chat WhatsApp — +" + waNumber;
+  }
+
+  waFloat = document.createElement("a");
   waFloat.className = "wa-float";
-  waFloat.href = WA_LINK;
   waFloat.target = "_blank";
   waFloat.rel = "noopener";
-  waFloat.setAttribute("aria-label", "Chat WhatsApp: +" + waNumber);
-  waFloat.title = "Chat WhatsApp — +" + waNumber;
   waFloat.innerHTML =
     '<svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.24h.01c5.5 0 9.95-4.46 9.95-9.96 0-2.66-1.04-5.16-2.92-7.04A9.9 9.9 0 0 0 12.04 2Zm5.84 14.16c-.25.7-1.44 1.34-1.99 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.99-.32-1.7-.63-2.99-1.29-4.94-4.3-5.09-4.5-.15-.2-1.22-1.62-1.22-3.09 0-1.47.77-2.19 1.04-2.49.27-.3.59-.37.79-.37l.57.01c.18.01.43-.07.67.51.25.6.84 2.07.91 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.15.47.13.64-.08.17-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.13.07.75-.18 1.45Z"/></svg>';
   document.body.appendChild(waFloat);
+  waApply();
+
+  /* Tiap klik tombol WA -> nomor CS diundi ulang (semua tombol tetap sinkron) */
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest("a") : null;
+    if (!a || (a !== waFloat && waCtas.indexOf(a) === -1)) return;
+    var next = waNumber;
+    while (next === waNumber) next = WA_NUMBERS[Math.floor(Math.random() * WA_NUMBERS.length)];
+    waNumber = next;
+    waApply();
+  });
 
   /* ---- Gallery pagination arrows ---- */
   var cur = 1;
