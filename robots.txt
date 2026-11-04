@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://ptnusapmcteknologimembraneindonesia.web.id/sitemap.xml
